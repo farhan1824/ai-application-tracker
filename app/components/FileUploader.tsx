@@ -48,7 +48,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
                   />
 
                   <div className="text-left min-w-0 flex-1">
-                    <p className="text-gray-700 font-semibold text-sm sm:text-base break-words">
+                    <p className="text-gray-700 font-semibold text-sm sm:text-base wrap-break-word">
                       {file.name}
                     </p>
                     <p className="text-xs sm:text-sm text-gray-500">
