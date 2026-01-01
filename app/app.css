@@ -142,7 +142,7 @@ form {
   }
 
   .uploader-selected-file {
-    @apply flex items-center justify-between p-3 bg-gray-50 rounded-2xl;
+    @apply flex items-center justify-between p-3 bg-gray-50 rounded-2xl w-full max-w-md;
   }
 }
 
