@@ -13,3 +13,8 @@ export function formatSize(bytes: number, decimals: number = 2): string {
 
   return Math.round((bytes / Math.pow(k, i)) * Math.pow(10, decimals)) / Math.pow(10, decimals) + " " + sizes[i];
 }
+
+
+export function generateUUID(): string {
+  return crypto.randomUUID();
+}

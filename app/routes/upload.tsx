@@ -3,11 +3,81 @@ export const meta = () => [
   { name: "Description", content: "Upload your resume." },
 ];
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import FileUploader from "~/components/FileUploader";
 import Navbar from "~/components/navbar";
+import { prepareInstructions } from "~/constants";
+import { convertPdfToImage } from "~/lib/pdf2img";
+import { usePuterStore } from "~/lib/puter";
+import { generateUUID } from "~/lib/utils";
 const upload = () => {
+  const { fs, ai, kv, auth, isLoading } = usePuterStore();
   const [isprocessing, setisprocessing] = useState(false);
   const [statuesText, setstatuesText] = useState("");
+  const navigate = useNavigate();
+  const handelAnalyze = async ({
+    file,
+    companyName,
+    jobTitle,
+    jobDescription,
+  }: {
+    file: File;
+    companyName: string;
+    jobTitle: string;
+    jobDescription: string;
+  }) => {
+    setisprocessing(true);
+    setstatuesText("Uploading your resume...");
+    const uploadFile = await fs.upload([file]);
+    if (!uploadFile) return setstatuesText("Upload failed.");
+
+    setstatuesText("Analyzing your resume...");
+
+    const imageFile = await convertPdfToImage(file);
+
+    if (!imageFile.file) {
+      setstatuesText(imageFile.error ?? "Failed to convert PDF to image");
+      return;
+    }
+
+    setstatuesText("Uploading image...");
+
+    const uploadImage = await fs.upload([imageFile.file]);
+
+    if (!uploadImage) {
+      setstatuesText("Upload failed.");
+      return;
+    }
+
+    setstatuesText("Processing image...");
+    const UUid = generateUUID();
+    const data = {
+      companyName,
+      jobTitle,
+      jobDescription,
+      id: UUid,
+      resumePath: uploadFile.path,
+      imageFile: uploadImage.path,
+      feedback: "",
+    };
+    await kv.set(`resume:${UUid}`, JSON.stringify(data));
+    setstatuesText("Analyzing...");
+    const feedback = await ai.feedback(
+      uploadFile.path,
+      prepareInstructions({ jobTitle, jobDescription })
+    );
+    if (!feedback) return setstatuesText("Analysis failed.");
+    const feedbacktext =
+      typeof feedback.message.content === "string"
+        ? feedback.message.content
+        : feedback.message.content[0].text;
+    data.feedback = feedbacktext;
+    await kv.set(`resume:${UUid}`, JSON.stringify(data));
+    setstatuesText("Analysis complete!");
+    // navigate(`/resume/${UUid}`);
+    console.log(data);
+  };
+
   const handelFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget.closest("form");
@@ -16,7 +86,9 @@ const upload = () => {
     const companyName = formData.get("company-name") as string;
     const jobTitle = formData.get("job-title") as string;
     const jobDescription = formData.get("job-description") as string;
-    console.log({ companyName, jobTitle, jobDescription, file });
+    if (!file) return;
+    handelAnalyze({ file, companyName, jobTitle, jobDescription });
+    // console.log({ companyName, jobTitle, jobDescription, file });
   };
   const [file, setfile] = useState<File | null>(null);
   const handelFileSelect = (file: File | null) => {
