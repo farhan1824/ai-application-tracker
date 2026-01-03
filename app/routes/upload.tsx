@@ -72,6 +72,18 @@ const upload = () => {
         ? feedback.message.content
         : feedback.message.content[0].text;
     data.feedback = feedbacktext;
+    // data.feedback = [
+    //   "ATS",
+    //   "toneAndStyle",
+    //   "content",
+    //   "structure",
+    //   "skills",
+    // ].flatMap((category) =>
+    //   (JSON.parse(feedbacktext)[category]?.tips || []).map((tip: any) => ({
+    //     ...tip,
+    //     category,
+    //   }))
+    // );
     await kv.set(`resume:${UUid}`, JSON.stringify(data));
     setstatuesText("Analysis complete!");
     // navigate(`/resume/${UUid}`);
