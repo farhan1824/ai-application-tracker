@@ -62,32 +62,39 @@ const upload = () => {
     };
     await kv.set(`resume:${UUid}`, JSON.stringify(data));
     setstatuesText("Analyzing...");
+
     const feedback = await ai.feedback(
       uploadFile.path,
       prepareInstructions({ jobTitle, jobDescription })
     );
-    if (!feedback) return setstatuesText("Analysis failed.");
-    const feedbacktext =
-      typeof feedback.message.content === "string"
-        ? feedback.message.content
-        : feedback.message.content[0].text;
-    data.feedback = feedbacktext;
-    // data.feedback = [
-    //   "ATS",
-    //   "toneAndStyle",
-    //   "content",
-    //   "structure",
-    //   "skills",
-    // ].flatMap((category) =>
-    //   (JSON.parse(feedbacktext)[category]?.tips || []).map((tip: any) => ({
-    //     ...tip,
-    //     category,
-    //   }))
-    // );
+
+    if (!feedback) {
+      setstatuesText("Analysis failed.");
+      return;
+    }
+
+    let parsedFeedback;
+
+    try {
+      parsedFeedback =
+        typeof feedback.message.content === "string"
+          ? JSON.parse(feedback.message.content)
+          : JSON.parse(feedback.message.content[0].text);
+    } catch (err) {
+      console.error(err);
+      setstatuesText("Invalid AI response.");
+      return;
+    }
+
+    data.feedback = parsedFeedback;
+
+    // save FINAL data
     await kv.set(`resume:${UUid}`, JSON.stringify(data));
+
     setstatuesText("Analysis complete!");
-    // navigate(`/resume/${UUid}`);
-    console.log(data);
+    navigate(`/resume/${UUid}`);
+
+    // console.log(data);
   };
 
   const handelFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -113,7 +120,7 @@ const upload = () => {
         {isprocessing ? (
           <>
             <h2>{statuesText}</h2>
-            <img src="/images/resume-scan-2.gif" alt="" />
+            <img src="/images/resume-scan.gif" alt="" />
           </>
         ) : (
           <>
