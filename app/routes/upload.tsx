@@ -58,7 +58,7 @@ const upload = () => {
       id: UUid,
       resumePath: uploadFile.path,
       imageFile: uploadImage.path,
-      feedback: "",
+      feedback: [],
     };
     await kv.set(`resume:${UUid}`, JSON.stringify(data));
     setstatuesText("Analyzing...");

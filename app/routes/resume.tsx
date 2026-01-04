@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import Ats from "~/components/Ats";
 import Details from "~/components/Details";
-import Summary from "~/components/summary";
+import Summary from "~/components/Summary";
+import Ats from "~/components/Ats";
 import { usePuterStore } from "~/lib/puter";
 
 export const meta = () => [
@@ -79,12 +79,22 @@ const resume = () => {
           {feedback ? (
             <div className="flex flex-col gap-8 animate-in fade-in duration-1000">
               <p>Summary Ats Details</p>
-              <Summary feedback={feedback}></Summary>
-              <Ats
+              <Summary feedback={feedback} />
+              {/* <Ats
                 score={feedback.ATS.score | 0}
-                suggestion={feedback.ATS.tips || []}
-              ></Ats>
-              <Details></Details>
+                suggestions={feedback.ATS.tips || []}
+              /> */}
+              <Ats
+                score={feedback?.ATS?.score ?? 0}
+                suggestions={
+                  feedback?.ATS?.tips?.map((s) => ({
+                    type: s.type,
+                    tip: Array.isArray(s.tip) ? s.tip : [s.tip], // wrap string in array
+                  })) ?? []
+                }
+              />
+
+              <Details feedback={feedback}></Details>
             </div>
           ) : (
             <img

@@ -4,6 +4,9 @@
  * @param decimals - Number of decimal places to show (default: 2)
  * @returns Human-readable file size string (e.g., "2.5 MB")
  */
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
 export function formatSize(bytes: number, decimals: number = 2): string {
   if (bytes === 0) return "0 Bytes";
 
@@ -17,4 +20,7 @@ export function formatSize(bytes: number, decimals: number = 2): string {
 
 export function generateUUID(): string {
   return crypto.randomUUID();
+}
+export function cn(...inputs:ClassValue[]): string {
+  return twMerge(clsx(...inputs));
 }

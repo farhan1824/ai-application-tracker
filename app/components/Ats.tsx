@@ -156,4 +156,4 @@ const ATS: React.FC<ATSProps> = ({ score, suggestions }) => {
 //   );
 // };
 
-// export default ATS;
+export default ATS;
